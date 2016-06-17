@@ -20,6 +20,11 @@ if (system.args.length < 3 || system.args.length > 4) {
         reportType = system.args[3];
     }
 
+    page.onError = function(msg, trace) {
+      console.error(msg);
+      phantom.exit(1);
+    };
+
     // Get the absolute working directory from the PWD var and
     // and the command line $0 argument.
     cwd = system.env['PWD'];
@@ -92,13 +97,16 @@ if (system.args.length < 3 || system.args.length > 4) {
         console.log('');
         console.log('Errors: ' + messages['ERROR'].length + ', Warnings: ' + messages['WARNING'].length +
             ', Notices: ' + messages['NOTICE'].length);
+	if (messages['ERROR'].length > 0) {
+	  throw "Error: Accessibility Errors found for standard: " + standard;
+	}
         cb();
     }
 
     page.open(address, function (status) {
         if (status !== 'success') {
             console.log('Unable to load the address!');
-            phantom.exit();
+            phantom.exit(1);
         } else {
             window.setTimeout(function () {
 
@@ -160,7 +168,7 @@ if (system.args.length < 3 || system.args.length > 4) {
                     break;
                     default:
                         console.log('Unknown standard.');
-                        phantom.exit();
+                        phantom.exit(1);
                     break;
                 }
             }, 200);
